@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Mystère du Sanctuaire</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --gold-light: #fff3a8;
+            --orange-active: #e67e22;
+            --stone-dark: #3a322c;
+            --stone-light: #e0d7c6;
+            --bg-color: #79a18d;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Georgia', serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            width: 1000px;
+            height: 620px;
+            background: linear-gradient(to bottom, #87ceeb 0%, #e0cda9 40%, #8b5a2b 100%);
+            border: 10px solid #2c1d11;
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Modales (Accueil / Fin) */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-box {
+            background: #f4e8c1;
+            border: 5px solid #5a4020;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            width: 450px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .modal-box h2 {
+            color: #3a200a;
+            margin-top: 0;
+        }
+
+        .modal-box input {
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            border: 2px solid #5a4020;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        /* En-tête */
+        header {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .title-banner {
+            background: #d0c0a0;
+            border: 3px solid #5a4020;
+            display: inline-block;
+            padding: 4px 25px;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #3a200a;
+            box-shadow: 0 4px 0 #3a200a;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c1d11;
+            margin-top: 3px;
+        }
+
+        /* Zone centrale */
+        .temple-door {
+            position: absolute;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 160px;
+            background: #4a3525;
+            border: 6px solid #8b6b47;
+            border-radius: 65px 65px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .lock-icon {
+            font-size: 32px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 50%;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 20px;
+            margin-bottom: 10px;
+            z-index: 2;
+        }
+
+        /* Parchemins */
+        .scroll-card {
+            background: #f4e8c1;
+            border: 3px solid #8b5a2b;
+            border-radius: 8px;
+            width: 210px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .scroll-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            color: #6a4a2b;
+            text-transform: uppercase;
+        }
+
+        .greek-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            margin: 4px 0;
+        }
+
+        .sub-text {
+            font-size: 11px;
+            color: #4a3525;
+            font-weight: bold;
+            white-space: pre-line;
+        }
+
+        .dictionary-note {
+            position: absolute;
+            bottom: -45px;
+            left: -10px;
+            background: #fff8dc;
+            border: 2px solid #8b5a2b;
+            padding: 4px 8px;
+            font-size: 10px;
+            transform: rotate(-4deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            white-space: pre-line;
+            text-align: left;
+        }
+
+        /* Panneau de contrôle */
+        .control-panel {
+            background: var(--stone-light);
+            border: 4px solid #6e5239;
+            border-radius: 12px;
+            width: 500px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .step-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #3a200a;
+            margin-bottom: 6px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(to bottom, #e6d0b3, #c4a882);
+            border: 2px solid #5a4020;
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #2c1d11;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1 1 20%;
+        }
+
+        .btn:hover { background: #f0dcbe; }
+
+        .btn.selected {
+            background: linear-gradient(to bottom, #ff9d00, #e67e22);
+            color: white;
+            border-color: #a04000;
+            box-shadow: 0 0 8px #ff9d00;
+        }
+
+        .btn-greek {
+            font-size: 15px;
+            padding: 8px 4px;
+            flex: 1 1 40%;
+        }
+
+        .progress-container { margin-top: 8px; }
+        .progress-label { font-size: 11px; font-weight: bold; color: #3a200a; }
+
+        .progress-bar {
+            width: 80%; height: 10px; background: #8b6b47;
+            margin: 3px auto; border-radius: 5px; overflow: hidden;
+            border: 1px solid #3a200a;
+        }
+
+        .progress-fill {
+            width: 0%; height: 100%;
+            background: linear-gradient(to right, #00d2ff, #3a7bd5);
+            transition: width 0.3s;
+        }
+
+        /* Pied de page */
+        footer {
+            background: #d0c0a0;
+            border-top: 4px solid #5a4020;
+            padding: 6px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c1d11;
+        }
+
+        .action-btn {
+            background: #e6d0b3;
+            border: 2px solid #5a4020;
+            border-radius: 5px;
+            padding: 6px 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .action-btn:hover { background: #f0dcbe; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Ecran de démarrage : Prénom -->
+    <div id="start-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>🏛️ Le Mystère du Sanctuaire</h2>
+            <p>Entrez votre prénom pour commencer l'épreuve des adjectifs :</p>
+            <input type="text" id="player-name-input" placeholder="Votre Prénom" maxlength="20">
+            <br>
+            <button class="action-btn" style="font-size: 16px;" onclick="startGame()">ENTRER DANS LE TEMPLE</button>
+        </div>
+    </div>
+
+    <!-- Ecran de Fin : Score -->
+    <div id="end-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h2>🎉 Victoire !</h2>
+            <p>Félicitations <strong id="end-player-name"></strong> !</p>
+            <p>Vous avez accordé les 20 adjectifs et débloqué le Sanctuaire.</p>
+            <h3 style="color: #a04000; font-size: 24px;">SCORE FINAL : <span id="end-score">0</span> XP</h3>
+            <button class="action-btn" style="font-size: 16px;" onclick="location.reload()">RECOMMENCER</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="title-banner">LE MYSTÈRE DU SANCTUAIRE</div>
+        <div class="subtitle">ÉCHAPPEZ-VOUS EN ACCORDANT LES ADJECTIFS !</div>
+    </header>
+
+    <div class="temple-door">
+        <div class="lock-icon" id="door-lock">🔒</div>
+    </div>
+
+    <div class="main-content">
+        <!-- Carte Nom Cible -->
+        <div class="scroll-card">
+            <h3>Nom Cible</h3>
+            <div class="greek-text" id="target-noun">-</div>
+            <div class="sub-text" id="target-grammar">-</div>
+            
+            <div class="dictionary-note">
+                <strong>DICTIONNAIRE</strong><br>
+                <span id="dict-entry">-</span>
+            </div>
+        </div>
+
+        <!-- Panneau de Contrôle -->
+        <div class="control-panel">
+            <div class="step-title">ÉTAPE 1 : DÉTERMINEZ LA CLASSE</div>
+            <div class="btn-group" id="class-group">
+                <button class="btn" onclick="selectClass(this, 1)">1ère CLASSE<br>(2-1-2)</button>
+                <button class="btn" onclick="selectClass(this, 2)">2e CLASSE<br>(3e décl. 2 t.)</button>
+                <button class="btn" onclick="selectClass(this, 3)">3e CLASSE<br>(3e décl. 3 t.)</button>
+                <button class="btn" onclick="selectClass(this, 4)">IRRÉGULIER</button>
+            </div>
+
+            <div class="step-title">ÉTAPE 2 : CHOISISSEZ LA BONNE FORME D'ACCORD</div>
+            <div class="btn-group" id="form-group"></div>
+
+            <div class="progress-container">
+                <div class="progress-label">FORME : <span id="form-count">1 / 20</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte Adjectif Souhaité -->
+        <div class="scroll-card">
+            <h3>Adjectif Souhaité</h3>
+            <div class="greek-text" id="target-adj">-</div>
+            <div class="sub-text" id="adj-translation">-</div>
+        </div>
+    </div>
+
+    <footer>
+        <div>
+            <span>JOUEUR : <strong id="display-player-name">-</strong></span> | 
+            <span>SCORE : <strong id="score">0</strong> XP</span>
+        </div>
+        <div>
+            <button class="action-btn" onclick="validateAnswer()">VALIDER</button>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // 20 FORMES D'ACCORD COMPLETES
+    const exercises = [
+        // véos (1ère classe)
+        { noun: "τῷ νεανίᾳ", grammar: "DATIF MASCULIN\nSINGULIER", dict: "ὁ νεανίας, -ου, M.\n(le jeune homme)", adj: "νέος, νέα, νέον", adjTrans: "(jeune)", correctClass: 1, options: ["τῷ νέῳ", "τῷ νέον", "τῷ νέους", "τῷ νέαν"], correctOption: 0 },
+        { noun: "τὰς ἡμέρας", grammar: "ACCUSATIF FÉMININ\nPLURIEL", dict: "ἡ ἡμέρα, -ας, F.\n(la journée)", adj: "νέος, νέα, νέον", adjTrans: "(jeune/nouvelle)", correctClass: 1, options: ["τὰς νέων", "τὰς νέας", "τὰς νέοις", "τὰς νέα"], correctOption: 1 },
+        // eudaimon (2e classe - 2 terminaisons)
+        { noun: "τοῖς πολίταις", grammar: "DATIF MASCULIN\nPLURIEL", dict: "ὁ πολίτης, -ου, M.\n(le citoyen)", adj: "εὐδαίμων, εὐδαῖμον", adjTrans: "(heureux)", correctClass: 2, options: ["τοῖς εὐδαίμοσι", "τοῖς εὐδαίμων", "τοῖς εὐδαιμόνων", "τοῖς εὐδαίμονα"], correctOption: 0 },
+        { noun: "τὴν πόλιν", grammar: "ACCUSATIF FÉMININ\nSINGULIER", dict: "ἡ πόλις, -εως, F.\n(la cité)", adj: "εὐδαίμων, εὐδαῖμον", adjTrans: "(heureuse)", correctClass: 2, options: ["τὴν εὐδαίμονα", "τὴν εὐδαῖμον", "τὴν εὐδαίμονος", "τὴν εὐδαίμοσιν"], correctOption: 0 },
+        { noun: "τὸ δῶρον", grammar: "NOMINATIF NEUTRE\nSINGULIER", dict: "τὸ δῶρον, -ου, N.\n(le présent/cadeau)", adj: "εὐδαίμων, εὐδαῖμον", adjTrans: "(heureux)", correctClass: 2, options: ["τὸ εὐδαίμων", "τὸ εὐδαῖμον", "τὸ εὐδαίμονα", "τὸ εὐδαίμονος"], correctOption: 1 },
+        // alètès (2e classe - 2 terminaisons)
+        { noun: "τῷ λόγῳ", grammar: "DATIF MASCULIN\nSINGULIER", dict: "ὁ λόγος, -ου, M.\n(la parole/discours)", adj: "ἀληθής, ἀληθές", adjTrans: "(vrai)", correctClass: 2, options: ["τῷ ἀληθεῖ", "τῷ ἀληθής", "τῷ ἀληθῶν", "τῷ ἀληθές"], correctOption: 0 },
+        { noun: "τὰς γνώμας", grammar: "ACCUSATIF FÉMININ\nPLURIEL", dict: "ἡ γνώμη, -ης, F.\n(l'opinion)", adj: "ἀληθής, ἀληθές", adjTrans: "(vraie)", correctClass: 2, options: ["τὰς ἀληθεῖς", "τὰς ἀληθῆ", "τὰς ἀληθῶν", "τὰς ἀληθέσιν"], correctOption: 0 },
+        { noun: "τῶν πραγμάτων", grammar: "GÉNITIF NEUTRE\nPLURIEL", dict: "τὸ πρᾶγμα, -ατος, N.\n(l'affaire/action)", adj: "ἀληθής, ἀληθές", adjTrans: "(vrai)", correctClass: 2, options: ["τῶν ἀληθῶν", "τῶν ἀληθεῖς", "τῶν ἀληθές", "τῶν ἀληθοῦς"], correctOption: 0 },
+        // charieis (3e classe - 3 terminaisons)
+        { noun: "τοῦ ποιητοῦ", grammar: "GÉNITIF MASCULIN\nSINGULIER", dict: "ὁ ποιητής, -οῦ, M.\n(le poète)", adj: "χαρίεις, χαρίεσσα, χαρίεν", adjTrans: "(élégant/gracieux)", correctClass: 3, options: ["τοῦ χαρίεντος", "τοῦ χαρίεσσαν", "τοῦ χαρίεν", "τοῦ χαριέσσης"], correctOption: 0 },
+        { noun: "τῇ κόρῃ", grammar: "DATIF FÉMININ\nSINGULIER", dict: "ἡ κόρη, -ης, F.\n(la jeune fille)", adj: "χαρίεις, χαρίεσσα, χαρίεν", adjTrans: "(élégante)", correctClass: 3, options: ["τῇ χαριέσσῃ", "τῇ χαρίεντι", "τῇ χαρίεσσαν", "τῇ χαρίεις"], correctOption: 0 },
+        { noun: "τὰ ἔπη", grammar: "NOMINATIF NEUTRE\nPLURIEL", dict: "τὸ ἔπος, -ους, N.\n(le mot/vers)", adj: "χαρίεις, χαρίεσσα, χαρίεν", adjTrans: "(élégant)", correctClass: 3, options: ["τὰ χαρίεντα", "τὰ χαρίεσσαι", "τὰ χαριέντων", "τὰ χαρίεν"], correctOption: 0 },
+        // èdus (3e classe - 3 terminaisons)
+        { noun: "τὸν οἶνον", grammar: "ACCUSATIF MASCULIN\nSINGULIER", dict: "ὁ οἶνος, -ου, M.\n(le vin)", adj: "ἡδύς, ἡδεῖα, ἡδύ", adjTrans: "(doux/agréable)", correctClass: 3, options: ["τὸν ἡδύν", "τὸν ἡδεῖαν", "τὸν ἡδέος", "τὸν ἡδύ"], correctOption: 0 },
+        { noun: "τῶν φωνῶν", grammar: "GÉNITIF FÉMININ\nPLURIEL", dict: "ἡ φωνή, -ῆς, F.\n(la voix)", adj: "ἡδύς, ἡδεῖα, ἡδύ", adjTrans: "(douce)", correctClass: 3, options: ["τῶν ἡδειῶν", "τῶν ἡδέων", "τῶν ἡδεῖαν", "τῶν ἡδέσιν"], correctOption: 0 },
+        { noun: "τοῖς ἄνθεσιν", grammar: "DATIF NEUTRE\nPLURIEL", dict: "τὸ ἄνθος, -ους, N.\n(la fleur)", adj: "ἡδύς, ἡδεῖα, ἡδύ", adjTrans: "(doux/agréable)", correctClass: 3, options: ["τοῖς ἡδέσιν", "τοῖς ἡδείαις", "τοῖς ἡδέων", "τοῖς ἡδύν"], correctOption: 0 },
+        // polus (Irrégulier)
+        { noun: "ὁ όχλος", grammar: "NOMINATIF MASCULIN\nSINGULIER", dict: "ὁ ὄχλος, -ου, M.\n(la foule)", adj: "πολύς, πολλή, πολύ", adjTrans: "(nombreux/grand)", correctClass: 4, options: ["ὁ πολύς", "ὁ πολλός", "ὁ πολλή", "ὁ πολλοῦ"], correctOption: 0 },
+        { noun: "τὴν σοφίαν", grammar: "ACCUSATIF FÉMININ\nSINGULIER", dict: "ἡ σοφία, -ας, F.\n(la sagesse)", adj: "πολύς, πολλή, πολύ", adjTrans: "(grande)", correctClass: 4, options: ["τὴν πολλήν", "τὴν πολύ", "τὴν πολλῶν", "τὴν πολύς"], correctOption: 0 },
+        { noun: "τῶν στρατιωτῶν", grammar: "GÉNITIF MASCULIN\nPLURIEL", dict: "ὁ στρατιώτης, -ου, M.\n(le soldat)", adj: "πολύς, πολλή, πολύ", adjTrans: "(nombreux)", correctClass: 4, options: ["τῶν πολλῶν", "τῶν πολλούς", "τῶν πολλῆς", "τῶν πολύν"], correctOption: 0 },
+        // megas (Irrégulier)
+        { noun: "τὴν νίκην", grammar: "ACCUSATIF FÉMININ\nSINGULIER", dict: "ἡ νίκη, -ης, F.\n(la victoire)", adj: "μέγας, μεγάλη, μέγα", adjTrans: "(grande)", correctClass: 4, options: ["τὴν μεγάλην", "τὴν μεγάλα", "τὴν μέγαν", "τὴν μεγάλη"], correctOption: 0 },
+        { noun: "τῷ βασιλεῖ", grammar: "DATIF MASCULIN\nSINGULIER", dict: "ὁ βασιλεύς, -έως, M.\n(le roi)", adj: "μέγας, μεγάλη, μέγα", adjTrans: "(grand)", correctClass: 4, options: ["τῷ μεγάλῳ", "τῷ μέγαν", "τῷ μεγάλῃ", "τῷ μέγας"], correctOption: 0 },
+        { noun: "τὰ δένδρα", grammar: "NOMINATIF NEUTRE\nPLURIEL", dict: "τὸ δένδρον, -ου, N.\n(l'arbre)", adj: "μέγας, μεγάλη, μέγα", adjTrans: "(grand)", correctClass: 4, options: ["τὰ μεγάλα", "τὰ μέγαν", "τὰ μεγάλων", "τὰ μεγάλη"], correctOption: 0 }
+    ];
+
+    let playerName = "";
+    let currentIdx = 0;
+    let selectedClass = null;
+    let selectedForm = null;
+    let score = 0;
+
+    function startGame() {
+        const input = document.getElementById("player-name-input").value.trim();
+        if (!input) {
+            alert("Veuillez entrer votre prénom !");
+            return;
+        }
+        playerName = input;
+        document.getElementById("display-player-name").innerText = playerName;
+        document.getElementById("start-modal").style.display = "none";
+        loadExercise(0);
+    }
+
+    function loadExercise(idx) {
+        const ex = exercises[idx];
+        document.getElementById("target-noun").innerText = ex.noun;
+        document.getElementById("target-grammar").innerText = ex.grammar;
+        document.getElementById("dict-entry").innerText = ex.dict;
+        document.getElementById("target-adj").innerText = ex.adj;
+        document.getElementById("adj-translation").innerText = ex.adjTrans;
+
+        document.getElementById("form-count").innerText = `${idx + 1} / ${exercises.length}`;
+        document.getElementById("progress-fill").style.width = `${((idx) / exercises.length) * 100}%`;
+
+        document.querySelectorAll("#class-group .btn").forEach(b => b.classList.remove("selected"));
+        selectedClass = null;
+
+        const formGroup = document.getElementById("form-group");
+        formGroup.innerHTML = "";
+        ex.options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-greek";
+            btn.innerText = opt;
+            btn.onclick = () => selectForm(btn, i);
+            formGroup.appendChild(btn);
+        });
+        selectedForm = null;
+    }
+
+    function selectClass(btn, classId) {
+        document.querySelectorAll("#class-group .btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedClass = classId;
+    }
+
+    function selectForm(btn, formIdx) {
+        document.querySelectorAll("#form-group .btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedForm = formIdx;
+    }
+
+    function validateAnswer() {
+        if (selectedClass === null || selectedForm === null) {
+            alert("Veuillez sélectionner la CLASSE et la FORME d'accord !");
+            return;
+        }
+
+        const ex = exercises[currentIdx];
+        if (selectedClass === ex.correctClass && selectedForm === ex.correctOption) {
+            score += 100;
+            document.getElementById("score").innerText = score;
+            alert("Excellente réponse !");
+        } else {
+            alert("Erreur d'accord ! La bonne réponse était : " + ex.options[ex.correctOption]);
+        }
+
+        currentIdx++;
+        if (currentIdx < exercises.length) {
+            loadExercise(currentIdx);
+        } else {
+            // Fin des 20 formes
+            document.getElementById("progress-fill").style.width = "100%";
+            document.getElementById("door-lock").innerText = "🔓";
+            document.getElementById("end-player-name").innerText = playerName;
+            document.getElementById("end-score").innerText = score;
+            document.getElementById("end-modal").style.display = "flex";
+        }
+    }
+</script>
+
+</body>
+</html>
